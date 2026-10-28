@@ -1,0 +1,136 @@
+using System;
+using System.Collections.Generic;
+
+namespace VehicleRentalSystem
+{
+    public class Vehicle
+    {
+        protected string vehicleId;
+        protected string brand;
+        protected double dailyRate;
+
+        public Vehicle(string vehicleId, string brand, double dailyRate)
+        {
+            this.vehicleId = vehicleId;
+            this.brand = brand;
+            this.dailyRate = dailyRate;
+        }
+
+        public virtual double CalculateRentalCost(int days)
+        {
+            return dailyRate * days;
+        }
+
+        public virtual void DisplayInfo()
+        {
+            Console.Write($"[ID={vehicleId}, Brand={brand}]");
+        }
+    }
+    public class Car : Vehicle
+    {
+        private int numSeats;
+
+        public Car(string vehicleId, string brand, double dailyRate, int numSeats)
+            : base(vehicleId, brand, dailyRate)
+        {
+            this.numSeats = numSeats;
+        }
+
+        public override double CalculateRentalCost(int days)
+        {
+            double baseCost = base.CalculateRentalCost(days);
+            return baseCost * 1.10; 
+        }
+
+        public override void DisplayInfo()
+        {
+            Console.Write($"Car [ID={vehicleId}, Brand={brand}, Seats={numSeats}]");
+        }
+    }
+    public class Motorcycle : Vehicle
+    {
+        private int engineCapacity;
+
+        public Motorcycle(string vehicleId, string brand, double dailyRate, int engineCapacity)
+            : base(vehicleId, brand, dailyRate)
+        {
+            this.engineCapacity = engineCapacity;
+        }
+
+        public override double CalculateRentalCost(int days)
+        {
+            double baseCost = base.CalculateRentalCost(days);
+            return baseCost * 0.95; 
+        }
+
+        public override void DisplayInfo()
+        {
+            Console.Write($"Motorcycle [ID={vehicleId}, Brand={brand}, CC={engineCapacity}]");
+        }
+    }
+    public class Customer
+    {
+        private string name;
+        private string licenseNumber;
+        private Vehicle rentedVehicle;
+
+        public Customer(string name, string licenseNumber)
+        {
+            this.name = name;
+            this.licenseNumber = licenseNumber;
+            this.rentedVehicle = null;
+        }
+
+        public void RentVehicle(Vehicle v)
+        {
+            this.rentedVehicle = v;
+        }
+
+        public void ReturnVehicle()
+        {
+            this.rentedVehicle = null;
+        }
+
+        public void PrintRentalSummary(int days)
+        {
+            Console.WriteLine($"Customer: {name} (License: {licenseNumber})");
+            if (rentedVehicle != null)
+            {
+                Console.Write("Rented: ");
+                rentedVehicle.DisplayInfo();
+                Console.WriteLine();
+                double totalCost = rentedVehicle.CalculateRentalCost(days); 
+                Console.WriteLine($"Total Cost for {days} days: ${totalCost:F2}");
+            }
+            else
+            {
+                Console.WriteLine("No vehicle currently rented.");
+            }
+        }
+    }
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            List<Vehicle> vehicles = new List<Vehicle>
+            {
+                new Car("101", "BMW", 100.0, 5),
+                new Motorcycle("102", "Yamaha", 50.0, 150)
+            };
+
+            Console.WriteLine("=== Vehicle Rental Costs ===");
+            foreach (var vehicle in vehicles)
+            {
+                vehicle.DisplayInfo();
+                double cost = vehicle.CalculateRentalCost(3); 
+                Console.WriteLine($" -> Cost for 3 days: ${cost:F2}");
+            }
+
+            Console.WriteLine("\n=== Customer Rental Summary ===");
+            Customer alice = new Customer("Alice", "AB1234");
+            Car customerCar = new Car("103", "BMW", 100.0, 5);
+            alice.RentVehicle(customerCar);
+            alice.PrintRentalSummary(5);
+        }
+    }
+}
